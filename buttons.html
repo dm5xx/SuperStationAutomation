@@ -3,25 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>SSAutomation DM5XX</title>
-    <style>
-        #btnpanel {
-          width: 1200px;
-          height: 800px;
-        }
-
-        #jsoneditor {
-          width: 1200px;
-          height: 700px;
-        }
-
-        body {
-            background-color: black;
-        }
-    </style>
     <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanilla-jsoneditor@2.3.3/themes/jse-theme-dark.css"> -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div id="overlay">
+        <div id="overlay-header" onclick="clearDraggList()">Last call...</div>
+        <div id="message-list"></div>
+    </div>
+
     <div class="bigh">Super.Station.Automation</div>
     <div class="smallh">Button Panel</div>
     <p>
@@ -34,93 +24,28 @@
     <script src="commander.js"></script>
     <script src="devicehandler.js"></script>
     <script src="cmddirector.js"></script>
+    <script src="msgoverlay.js"></script>
     <script>        
-        let controllers = [];
-        let BigCmdDirector = null;
-        let buttonJson = null; 
-/*        [
-{
-    "cmdSet":[
-        { "Cmd": "S/0/1", "delayNext": 5000},
-        { "Cmd": "S/0/2", "delayNext": 5000},
-        { "Cmd": "S/0/4,", "delayNext": 5000}    
-    ],
-    "Mode":"ws",
-    "ip":"192.168.0.104",
-    "title": "10m",
-    "alt": "Dieser komische button macht einen haufen zeugs.",
-    "color": "red"
-},
-{
-    "cmdSet":[
-        { "Cmd": "set0/3/1", "delayNext": 5000},
-        { "Cmd": "set0/4/1", "delayNext": 5000},
-        { "Cmd": "set0/5/1,", "delayNext": 5000}    
-    ],
-    "Mode":"http",
-    "ip":"192.168.0.104",
-    "title": "Button1",
-    "alt": "Dieser komische button macht einen haufen zeugs.",
-    "color": "blue"
-},
-{
-    "cmdSet":[
-        { "Cmd": "set0/0/1", "delayNext": 5000},
-        { "Cmd": "set0/1/1", "delayNext": 5000},
-        { "Cmd": "set0/2/1,", "delayNext": 5000}    
-    ],
-    "Mode":"http",
-    "ip":"192.168.0.104",
-    "title": "Button1",
-    "alt": "Dieser komische button macht einen haufen zeugs.",
-    "color": "gray",
-    "br": true
-},
-{
-    "cmdSet":[
-        { "Cmd": "set0/3/1", "delayNext": 5000},
-        { "Cmd": "set0/4/1", "delayNext": 5000},
-        { "Cmd": "set0/5/1,", "delayNext": 5000}    
-    ],
-    "Mode":"http",
-    "ip":"192.168.0.104",
-    "title": "Button1",
-    "alt": "Dieser komische button macht einen haufen zeugs.",
-    "color": "#ffab98"
-},{
-    "cmdSet":[
-        { "Cmd": "set0/0/1", "delayNext": 5000},
-        { "Cmd": "set0/1/1", "delayNext": 5000},
-        { "Cmd": "set0/2/1,", "delayNext": 5000}    
-    ],
-    "Mode":"http",
-    "ip":"192.168.0.104",
-    "title": "Button1",
-    "alt": "Dieser komische button macht einen haufen zeugs.",
-    "color": "rgb(13,97,3)"
-},
-{
-    "cmdSet":[
-        { "Cmd": "set0/3/1", "delayNext": 5000},
-        { "Cmd": "set0/4/1", "delayNext": 5000},
-        { "Cmd": "set0/5/1,", "delayNext": 5000}    
-    ],
-    "Mode":"http",
-    "ip":"192.168.0.104",
-    "title": "Button1",
-    "alt": "Dieser komische button macht einen haufen zeugs.",
-    "color": "peachpuff"
-}
-];
-*/
+    let controllers = [];
+    let BigCmdDirector = null;
+    let buttonJson = null; 
+
     let devicehandler = new DeviceHandler();
+    const draggableOverlay = new DraggableOverlay();
+
+    function clearDraggList()
+    {
+        draggableOverlay.clear();
+    }
+
     function fireBtn(btnnr) {
         let ttt = buttonJson[btnnr];
         let devX = devicehandler.Devices.findIndex(x => x.ip == ttt.ip);
 
         devicehandler.Devices[devX].executeSetCommands(ttt.cmdSet);
-    }
 
+        draggableOverlay.addMessage(ttt.title);
+    }
 
     </script>
     <script type="module">

@@ -3,6 +3,56 @@
   font-family: 'matrixx';
   src: URL('Elements.ttf') format('truetype');
 }
+
+#btnpanel {
+  width: 1200px;
+  height: 800px;
+}
+
+#jsoneditor {
+  width: 1200px;
+  height: 700px;
+}
+
+body {
+    background-color: black;
+}
+
+#overlay {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    width: 300px;
+    background-color: black;
+    border: 1px solid #32CD32;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    cursor: move;
+    user-select: none;
+    color: white;
+    font-family: arial;
+}
+#overlay-header {
+    background-color: #004a00;
+    padding: 10px;
+    cursor: move;
+    font-family: matrixx;
+    font-weight: 300;
+}
+#message-list {
+    max-height: 600px;
+    overflow-y: auto;
+}
+.message {
+    padding: 10px;
+    border-bottom: 1px solid darkslategray;
+}
+.message:first-child {
+    background-color: cornflowerblue;
+    color: white;
+    font-family: arial;
+    font-weight: bold;
+}
+
 .bigh {
   color: rgb(255, 0, 0);
   border: none;
