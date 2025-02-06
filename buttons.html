@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SSAutomation DM5XX</title>
+    <style>
+        #btnpanel {
+          width: 1200px;
+          height: 800px;
+        }
+
+        #jsoneditor {
+          width: 1200px;
+          height: 700px;
+        }
+
+        body {
+            background-color: black;
+        }
+    </style>
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanilla-jsoneditor@2.3.3/themes/jse-theme-dark.css"> -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="bigh">Super.Station.Automation</div>
+    <div class="smallh">Button Panel</div>
+    <p>
+        <button class="button" id="loadButtonConfig">Load ButtonConfig</button>
+        <button class="button" id="openEditor">Edit ButtonConfig</button>
+    </p>
+    <div id="btnpanel" style="display: none;"></div>
+    <div class="jse-theme-dark" id="jsoneditor" style="display: none;"></div>
+    <button class="button" id="saveToFile" style="visibility: hidden;">Save to File</button>
+    <script src="commander.js"></script>
+    <script src="devicehandler.js"></script>
+    <script src="cmddirector.js"></script>
+    <script>        
+        let controllers = [];
+        let BigCmdDirector = null;
+        let buttonJson = null; 
+/*        [
+{
+    "cmdSet":[
+        { "Cmd": "S/0/1", "delayNext": 5000},
+        { "Cmd": "S/0/2", "delayNext": 5000},
+        { "Cmd": "S/0/4,", "delayNext": 5000}    
+    ],
+    "Mode":"ws",
+    "ip":"192.168.0.104",
+    "title": "10m",
+    "alt": "Dieser komische button macht einen haufen zeugs.",
+    "color": "red"
+},
+{
+    "cmdSet":[
+        { "Cmd": "set0/3/1", "delayNext": 5000},
+        { "Cmd": "set0/4/1", "delayNext": 5000},
+        { "Cmd": "set0/5/1,", "delayNext": 5000}    
+    ],
+    "Mode":"http",
+    "ip":"192.168.0.104",
+    "title": "Button1",
+    "alt": "Dieser komische button macht einen haufen zeugs.",
+    "color": "blue"
+},
+{
+    "cmdSet":[
+        { "Cmd": "set0/0/1", "delayNext": 5000},
+        { "Cmd": "set0/1/1", "delayNext": 5000},
+        { "Cmd": "set0/2/1,", "delayNext": 5000}    
+    ],
+    "Mode":"http",
+    "ip":"192.168.0.104",
+    "title": "Button1",
+    "alt": "Dieser komische button macht einen haufen zeugs.",
+    "color": "gray",
+    "br": true
+},
+{
+    "cmdSet":[
+        { "Cmd": "set0/3/1", "delayNext": 5000},
+        { "Cmd": "set0/4/1", "delayNext": 5000},
+        { "Cmd": "set0/5/1,", "delayNext": 5000}    
+    ],
+    "Mode":"http",
+    "ip":"192.168.0.104",
+    "title": "Button1",
+    "alt": "Dieser komische button macht einen haufen zeugs.",
+    "color": "#ffab98"
+},{
+    "cmdSet":[
+        { "Cmd": "set0/0/1", "delayNext": 5000},
+        { "Cmd": "set0/1/1", "delayNext": 5000},
+        { "Cmd": "set0/2/1,", "delayNext": 5000}    
+    ],
+    "Mode":"http",
+    "ip":"192.168.0.104",
+    "title": "Button1",
+    "alt": "Dieser komische button macht einen haufen zeugs.",
+    "color": "rgb(13,97,3)"
+},
+{
+    "cmdSet":[
+        { "Cmd": "set0/3/1", "delayNext": 5000},
+        { "Cmd": "set0/4/1", "delayNext": 5000},
+        { "Cmd": "set0/5/1,", "delayNext": 5000}    
+    ],
+    "Mode":"http",
+    "ip":"192.168.0.104",
+    "title": "Button1",
+    "alt": "Dieser komische button macht einen haufen zeugs.",
+    "color": "peachpuff"
+}
+];
+*/
+    let devicehandler = new DeviceHandler();
+    function fireBtn(btnnr) {
+        let ttt = buttonJson[btnnr];
+        let devX = devicehandler.Devices.findIndex(x => x.ip == ttt.ip);
+
+        devicehandler.Devices[devX].executeSetCommands(ttt.cmdSet);
+    }
+
+
+    </script>
+    <script type="module">
+        import { createJSONEditor } from 'https://cdn.jsdelivr.net/npm/vanilla-jsoneditor@2/standalone.js';
+
+        let buttonsfilename = "buttons";
+        const readConfigFile = async () => 
+        {
+            return new Promise((resolve, reject) => {
+                const input = document.createElement('input');
+                input.type = 'file';
+
+                input.accept = '.json';
+                input.onchange = (event) => 
+                {
+                    const file = event.target.files[0];
+                    const reader = new FileReader();
+                
+                    reader.onload = (e) => {
+                        try {
+                            const config = JSON.parse(e.target.result);
+                            resolve(config);
+                        } catch (parseError) {
+                            reject(parseError);
+                        }
+                    };
+                    reader.onerror = (error) => reject(error);
+                    reader.readAsText(file);
+                };
+                input.click();
+                input.remove();
+            });
+        }
+
+        const readConfigServer = async () =>
+        {
+            const url = "./jsonhandlerread.php?fn=";
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`Response status: ${response.status}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error(error.message);
+            }
+        }
+
+                // create the editor
+        const editor = createJSONEditor({
+            target: document.getElementById('jsoneditor')
+        })
+
+                // set json
+        document.getElementById('openEditor').onclick = async function () {
+            let content = {
+                text: undefined, // used in text mode
+                json: undefined
+            }
+
+            try {
+                let resul = await readConfigFile();
+                content.json =  resul;
+                editor.set(content);
+
+                document.getElementById("btnpanel").style.display = "none";
+                document.getElementById("jsoneditor").style.display = "block";
+
+                document.getElementById("saveToFile").style.visibility = "visible";
+            } catch (error) {
+                console.error('Failed to load config:', error);
+            } 
+        }
+
+        document.getElementById('saveToFile').onclick = async function () {
+            const content = editor.get()
+            const hdl = await saveFile(content.json);
+            location.reload();
+            controllers = content.json;
+        }
+
+        const saveToServer = async (conten) => {
+
+            const getEditorContent = JSON.stringify(editor.get());
+            
+            const response = await fetch("%URLPLACEHOLDER%", {
+            method: 'POST',
+            headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+            },
+            body: getEditorContent
+            });
+        }
+
+        const saveFile = async (content) => {
+            try {
+                // create a new handle
+                const newHandle = await window.showSaveFilePicker();
+
+                // create a FileSystemWritableFileStream to write to
+                const stream = await newHandle.createWritable();
+
+                try {
+                    await stream.write({
+                    type: "write",
+                    data: JSON.stringify(content)
+                    });
+                    await stream.close();
+                } catch (error) {
+                    console.error('Error writing to file:', error);
+                    await stream.abort();
+                }
+                
+            } catch (err) {
+                console.error(err.name, err.message);
+            }
+        }
+
+        const buttonGenerator = async (btnjsn) =>
+        {
+            let btncontainer = document.getElementById("btnpanel");
+            btncontainer.innerHTML = "";
+
+            if(btncontainer.style.display == "none")
+            {
+                btncontainer.style.display = "block";
+                document.getElementById("jsoneditor").style.display = "none";
+            }
+
+
+            for(let a=0; a < btnjsn.length; a++)
+            {
+                const button = document.createElement('button');
+                button.type = "button";
+                button.textContent = btnjsn[a].title;
+                button.className = "genbtn";
+                button.title = btnjsn[a].alt;
+                button.setAttribute("onclick","fireBtn('"+a+"')");
+                button.setAttribute("style","color:white; background-color:"+btnjsn[a].color);
+                btncontainer.appendChild(button);
+
+                if(btnjsn[a].br == true)
+                    btncontainer.appendChild(document.createElement('br'));
+
+                let devX = devicehandler.Devices.findIndex(x => x.ip == btnjsn[a].ip);
+
+                if(devX > -1 && devicehandler.Devices[devX].mode == btnjsn[a].Mode)
+                    continue;
+
+                if(btnjsn[a].Mode == "http")
+                {
+                    devicehandler.AddDevice(new CORSUrlCommander(btnjsn[a].ip));                    
+                }
+                else if(btnjsn[a].Mode == "ws")
+                {
+                    devicehandler.AddDevice(new WebSocketCommander(btnjsn[a].ip));
+                }
+            }
+        }
+            // set json
+        document.getElementById('loadButtonConfig').onclick = async function () {
+            let content = {
+                text: undefined, // used in text mode
+                json: undefined
+            }
+
+            document.getElementById("btnpanel").style.display = "block";
+            document.getElementById("jsoneditor").style.display = "none";
+
+            try {
+                buttonJson = await readConfigFile();
+                buttonGenerator(buttonJson);
+
+            } catch (error) {
+                console.error('Failed to load config:', error);
+            } 
+        }
+
+        if(buttonJson != null)
+        {
+            buttonGenerator(buttonJson);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SSAutomation DM5XX</title>
+    <style>
+        #jsoneditor {
+          width: 1200px;
+          height: 700px;
+        }
+
+        body {
+            background-color: black;
+        }
+    </style>
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanilla-jsoneditor@2.3.3/themes/jse-theme-dark.css"> -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="bigh">Super.Station.Automation</div>
+    <div class="smallh">Infrastructure Admin Panel</div>
+    <p>
+        <button class="button" id="loadController">Load ControllerSetup</button>
+        <button class="button" id="loadStatesControllers" style="visibility:hidden">Load ControllerStates from Controllers</button>
+        <button class="button" id="loadStatesFile" style="visibility:hidden">Load ControllerStates from File</button>
+    </p>
+    <div class="jse-theme-dark" id="jsoneditor"></div>
+    <button class="button" id="writeController" style="visibility:hidden">Write ControllerSetup to file</button>
+    <button class="button" id="writeStatesBackController" style="visibility:hidden">Write ControllerStates back to Controllers</button>
+    <button class="button" id="writeStatesFile" style="visibility:hidden">Write ControllerStates to a file</button>
+    <script src="commander.js"></script>
+    <script src="devicehandler.js"></script>
+    <script src="cmddirector.js"></script>
+    <script>
+        /*
+            cmdSet => [ 
+                { Cmd: "set1/1/1", delayNext: 5000},
+                { Cmd: "Set1/2/1", delayNext: 5000},
+                { Cmd: "Set1/3/1,", delayNext: 5000}
+            ]
+
+            // {"Status":{"B0":7,"B1":0,"B2":0,"B3":0,"B4":1,"LockStatus":false,"Interlock":false},"Mode":"ws","ip":"192.168.0.104"}
+
+        */        
+        //const deviceHandler = new DeviceHandler(controllers);
+        //const BigCmdDirector = new CmdDirector(new DeviceHandler(controllers));
+        
+        let controllers = [];
+        let resuli = [];
+        let BigCmdDirector = null;
+
+    </script>
+    <script type="module">
+        import { createJSONEditor } from 'https://cdn.jsdelivr.net/npm/vanilla-jsoneditor@2/standalone.js';
+
+        const readConfigFile = async () => 
+        {
+            return new Promise((resolve, reject) => {
+                const input = document.createElement('input');
+                input.type = 'file';
+
+                input.accept = '.json';
+                input.onchange = (event) => 
+                {
+                    const file = event.target.files[0];
+                    const reader = new FileReader();
+                
+                    reader.onload = (e) => {
+                        try {
+                            const config = JSON.parse(e.target.result);
+                            resolve(config);
+                        } catch (parseError) {
+                            reject(parseError);
+                        }
+                    };
+                    reader.onerror = (error) => reject(error);
+                    reader.readAsText(file);
+                };
+                input.click();
+                input.remove();
+            });
+        }
+
+        const saveFile = async (content) => {
+            try {
+                // create a new handle
+                const newHandle = await window.showSaveFilePicker();
+
+                // create a FileSystemWritableFileStream to write to
+                const stream = await newHandle.createWritable();
+
+                try {
+                    await stream.write({
+                    type: "write",
+                    data: JSON.stringify(content)
+                    });
+                    await stream.close();
+                } catch (error) {
+                    console.error('Error writing to file:', error);
+                    await stream.abort();
+                }
+                
+            } catch (err) {
+                console.error(err.name, err.message);
+            }
+        }
+        // create the editor
+        const editor = createJSONEditor({
+          target: document.getElementById('jsoneditor')
+        })
+  
+        // set json
+        document.getElementById('loadController').onclick = async function () {
+            let content = {
+                text: undefined, // used in text mode
+                json: undefined
+            }
+
+            try {
+                controllers = await readConfigFile();
+                content.json =  controllers;
+                editor.set(content);
+
+                BigCmdDirector = new CmdDirector(new DeviceHandler(controllers));
+                document.getElementById("loadStatesControllers").style.visibility = "visible";
+                document.getElementById("loadStatesFile").style.visibility = "visible";
+                let co = document.getElementById("writeController")
+                co.style.pointerEvents = 'auto' ;
+                co.style.visibility = "visible";
+            } catch (error) {
+                console.error('Failed to load config:', error);
+            } 
+        }
+
+        document.getElementById('loadStatesControllers').onclick = function () {
+            let content = {
+                text: undefined, // used in text mode
+                json: undefined
+            }
+ 
+            let erg = BigCmdDirector.deviceHandler.GetAllStateAsArray();
+            erg.then((result) =>
+            {
+                resuli = result;
+                content.json = result;
+                editor.set(content);
+                let co = document.getElementById("writeController")
+                co.style.pointerEvents = 'none' ;
+                document.getElementById("writeStatesBackController").style.visibility = "visible";
+                document.getElementById("writeStatesFile").style.visibility = "visible";                
+            });
+        }
+
+        document.getElementById('loadStatesFile').onclick = async function () {
+            let content = {
+                text: undefined, // used in text mode
+                json: undefined
+            }
+
+            try {
+                controllers = await readConfigFile();
+                content.json =  controllers;
+                editor.set(content);
+                let co = document.getElementById("writeController")
+                co.style.pointerEvents = 'none' ;
+            } catch (error) {
+                console.error('Failed to load config:', error);
+            } 
+
+ 
+        }
+
+        document.getElementById('writeController').onclick = function () {
+            const content = editor.get()
+            saveFile(content.json);
+            controllers = content.json;
+            BigCmdDirector.deviceHandler.RemoveAllDevices();
+            BigCmdDirector.deviceHandler.Controllers = [];
+            BigCmdDirector.deviceHandler.Controllers = controllers;
+            BigCmdDirector.deviceHandler.initControllers();           
+        }
+
+        document.getElementById('writeStatesBackController').onclick = function () {
+            const content = editor.get();
+
+            let cont = content.json;
+
+                // {"Status":{"B0":7,"B1":0,"B2":0,"B3":0,"B4":1,"LockStatus":false,"Interlock":false},"Mode":"ws","ip":"192.168.0.104"}
+            cont.forEach(eee => {
+                let ccc = BigCmdDirector.convertCompleteBankResultToCmdSet(eee, 100);
+                BigCmdDirector.updateDeviceWithCmdSet(eee.ip, ccc);
+            })
+
+        }
+
+        document.getElementById('writeStatesFile').onclick = function () {
+            const content = editor.get()
+            saveFile(content.json);
+            controllers = content.json;
+        }
+      </script>
+</body>
+</html>

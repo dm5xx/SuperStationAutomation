@@ -1,0 +1,101 @@
+<html>
+  <link rel="stylesheet" href="admin.css">
+<style>
+input {
+  width: 50px;
+}
+
+.rly {
+  height : 40px;
+  width: 50px;
+  text-align: center;
+  vertical-align: middle;
+  font-weight: bold;
+  border: 3px solid black;
+}
+
+div:hover {
+  cursor: pointer;
+}
+</style>
+
+<body>
+  <table>
+    <tr style="background-color: cornflowerblue; text-align: center;">
+      <td colspan="8">
+        <div>Calculate the values for relay bank calls</div>
+      </td>
+    </tr>
+    <tr>
+      <td><div class="rly" id="c0" onclick="valueOp(0)">Relay 1</div></td>
+      <td><div class="rly" id="c1" onclick="valueOp(1)">Relay 2</div></td>
+      <td><div class="rly" id="c2" onclick="valueOp(2)">Relay 3</div></td>
+      <td><div class="rly" id="c3" onclick="valueOp(3)">Relay 4</div></td>
+      <td><div class="rly" id="c4" onclick="valueOp(4)">Relay 5</div></td>
+      <td><div class="rly" id="c5" onclick="valueOp(5)">Relay 6</div></td>
+      <td><div class="rly" id="c6" onclick="valueOp(6)">Relay 7</div></td>
+      <td><div class="rly" id="c7" onclick="valueOp(7)">Relay 8</div></td>
+    </tr>
+    <tr>
+      <td><div class="rly" id="c8" onclick="valueOp(8)">Relay 9</div></td>
+      <td><div class="rly" id="c9" onclick="valueOp(9)">Relay 10</div></td>
+      <td><div class="rly" id="c10" onclick="valueOp(10)">Relay 11</div></td>
+      <td><div class="rly" id="c11" onclick="valueOp(11)">Relay 12</div></td>
+      <td><div class="rly" id="c12" onclick="valueOp(12)">Relay 13</div></td>
+      <td><div class="rly" id="c13" onclick="valueOp(13)">Relay 14</div></td>
+      <td><div class="rly" id="c14" onclick="valueOp(14)">Relay 15</div></td>
+      <td><div class="rly" id="c15" onclick="valueOp(15)">Relay 16</div></td>
+    </tr>
+    <tr>
+      <td colspan="8"><input id="display" value="0" readonly></input>&nbsp;<button id="memory" onclick="clipboard()">Copy selection into the clipboard</button></td>
+    </tr>
+  </table>
+<script>
+
+function valueOp(bit)
+{
+  let currentValue = parseInt(display.value);
+
+  let isCurrentBitSet = isKthBitInNSet(currentValue, (bit));
+
+  let div = document.getElementById("c"+bit);
+
+  if(!isCurrentBitSet)
+  {
+    currentValue += Math.pow(2, bit);
+    div.style.background = "red";
+  }
+  else
+  {
+    currentValue -= Math.pow(2, bit);
+    div.style.background = "cornflowerblue";
+  }
+  
+  display.value = parseInt(currentValue);
+}
+
+function isKthBitInNSet(n, k) 
+{ 
+  if (n & (1 << (k))) 
+    return true; 
+  else
+  return false;
+}
+
+function setKthBitInN(n, k) 
+{ 
+  return ((1 << k) | n); 
+}
+
+function clipboard() {
+  let currentValue = display.value;
+  display.select();
+  document.execCommand('copy');
+  document.getElementById("memory").focus();
+}
+
+let display = document.getElementById("display");
+display.value = 0;
+</script>
+</body>
+</html>
