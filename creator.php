@@ -20,19 +20,18 @@ function processHTMLFile($filename, $myjson) {
     if($filename == "buttons.html" && $myjson != null)
     {
         $jj = file_get_contents($jfilepath);
-        // $content = str_replace("let buttonJson = null;", "let buttonJson =".$jj.";", $content);   
-        // $content = str_replace("readConfigFile()", "readConfigServer()", $content);   
-        // $content = str_replace("./jsonhandlerread.php?fn=", "./jsonhandlerread.php?fn=".$myjson, $content);   
-        // $content = str_replace("saveFile = async", "saveToServer = async", $content);
-
         $actual_link = (empty($_SERVER['HTTPS']) ? 'http' : 'https') . "://$_SERVER[HTTP_HOST]".dirname($_SERVER['PHP_SELF'])."/jsonhandlerwrite.php";
+        $actual_linknewbuttonfile = (empty($_SERVER['HTTPS']) ? 'http' : 'https') . "://$_SERVER[HTTP_HOST]".dirname($_SERVER['PHP_SELF'])."/newbuttonfile.php";
 
         $replacements = [
             "let buttonJson = null;" => "let buttonJson =".$jj.";",   
             "readConfigFile()" => "readConfigServer()",   
             "./jsonhandlerread.php?fn=" => "./jsonhandlerread.php?fn=".$myjson,   
             "saveFile(" => "saveToServer(",
-            "%URLPLACEHOLDER%" => $actual_link."?fn=".$myjson
+            "%URLPLACEHOLDER%" => $actual_link."?fn=".$myjson,
+            "//NEWFILEATSERVERJS" => str_replace("%pathnewbuttonfile%", $actual_linknewbuttonfile, file_get_contents("./newfileplaceholderjs.txt")),
+            "<!--NEWFILEATSERVERHTML-->" => file_get_contents("./newfileplaceholderhtml.txt"),
+            "onclick=\"fopenOverlay()\" style=\"visibility: hidden;\"" => "onclick=\"fopenOverlay()\" style=\"visibility: show;\"" 
         ];
     
         // Perform replacements
@@ -40,18 +39,6 @@ function processHTMLFile($filename, $myjson) {
             $content = str_replace($placeholder, $replacement, $content);
         }
     }
-    // // Example replacements (you can customize these)
-    // $replacements = [
-    //     '{{CURRENT_YEAR}}' => date('Y'),
-    //     '{{SITE_NAME}}' => 'My Dynamic Website',
-    //     // Add more placeholder replacements as needed
-    // ];
-
-    // // Perform replacements
-    // foreach ($replacements as $placeholder => $replacement) {
-    //     $content = str_replace($placeholder, $replacement, $content);
-    // }
-
     return $content;
 }
 

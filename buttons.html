@@ -5,8 +5,12 @@
     <title>SSAutomation DM5XX</title>
     <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanilla-jsoneditor@2.3.3/themes/jse-theme-dark.css"> -->
     <link rel="stylesheet" href="styles.css">
+    <script>        
+    //NEWFILEATSERVERJS
+    </script>
 </head>
 <body>
+    <!--NEWFILEATSERVERHTML-->
     <div id="overlay">
         <div id="overlay-header" onclick="clearDraggList()">Last call...</div>
         <div id="message-list"></div>
@@ -17,6 +21,8 @@
     <p>
         <button class="button" id="loadButtonConfig">Load ButtonConfig</button>
         <button class="button" id="openEditor">Edit ButtonConfig</button>
+        <button class="button" onclick="fopenOverlay()" style="visibility: hidden;">Create NewButtonConfig</button>
+        
     </p>
     <div id="btnpanel" style="display: none;"></div>
     <div class="jse-theme-dark" id="jsoneditor" style="display: none;"></div>
