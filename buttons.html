@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>SSAutomation DM5XX</title>
+    <title>SSA-Buttons</title>
     <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanilla-jsoneditor@2.3.3/themes/jse-theme-dark.css"> -->
     <link rel="stylesheet" href="styles.css">
     <script>        
@@ -47,8 +47,93 @@
     function fireBtn(btnnr) {
         let ttt = buttonJson[btnnr];
         let devX = devicehandler.Devices.findIndex(x => x.ip == ttt.ip);
+    
+        let differentIps = [];
+        let noDifIp = [];
 
-        devicehandler.Devices[devX].executeSetCommands(ttt.cmdSet);
+        for(let a=0; a < ttt.cmdSet.length; a++)
+        {
+            if(ttt.cmdSet[a].dip != undefined)
+            {
+                let newentry = {};
+                newentry.ip = ttt.cmdSet[a].dip;
+                newentry.cmd = ttt.cmdSet[a].Cmd;
+                newentry.mode = ttt.cmdSet[a].mode;
+                newentry.delayNext = ttt.cmdSet[a].delayNext;
+                differentIps.push(newentry);
+            }
+            else
+            {
+                noDifIp.push(ttt.cmdSet[a]);
+            }
+        }
+
+        if(devX > -1)
+            devicehandler.Devices[devX].executeSetCommands(noDifIp);
+
+        let uniqueiparr = [];
+
+        // get unique ip adresses as lost of element to fill
+        for (index = 0; index < differentIps.length; index++) {
+            let elm = {};
+            elm.cmdSet = [];
+
+            if(uniqueiparr.length == 0)
+            {
+                elm.ip = differentIps[index].ip;
+                elm.mode = differentIps[index].mode;
+                uniqueiparr.push(elm);
+                continue;
+            }
+
+            let sidx = uniqueiparr.findIndex(x => x.ip == differentIps[index].ip);
+
+            if(sidx== -1 || uniqueiparr[sidx].mode != differentIps[index].mode)
+            {
+                elm.ip = differentIps[index].ip;
+                elm.mode = differentIps[index].mode;
+                elm.cmdSet.push
+                uniqueiparr.push(elm);                
+            }
+        }
+
+        // fill the elements correct
+        for(let d=0; d < differentIps.length; d++)
+        {
+            let idx = uniqueiparr.findIndex(x => x.ip == differentIps[d].ip && x.mode == differentIps[d].mode);
+
+            uniqueiparr[idx].cmdSet.push(
+                {
+                    "Cmd" : differentIps[d].cmd,
+                    "delayNext" : differentIps[d].delayNext
+                }
+            )
+        }
+
+        for(let c=0; c < uniqueiparr.length; c++)
+        {
+            // check if the device is already added
+            let dX = devicehandler.Devices.findIndex(x => x.ip == uniqueiparr[c].ip && x.mode == uniqueiparr[c].mode);
+
+            if(dX == -1)
+            {
+                if(uniqueiparr[c].mode == "http")
+                {
+                    devicehandler.AddDevice(new CORSUrlCommander(uniqueiparr[c].ip));                    
+                }
+                else if(uniqueiparr[c].mode == "ws")
+                {
+                    devicehandler.AddDevice(new WebSocketCommander(uniqueiparr[c].ip));
+                }
+
+                let nn = new Number(devicehandler.Devices.length-1);
+                setTimeout(() => { devicehandler.Devices[nn].executeSetCommands(uniqueiparr[c].cmdSet)},500);
+            }
+            else
+            {
+                devicehandler.Devices[dX].executeSetCommands(uniqueiparr[c].cmdSet);
+            }
+        }
 
         draggableOverlay.addMessage(ttt.title);
     }

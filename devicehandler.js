@@ -27,7 +27,7 @@
     }
     
     AddDevice(commander) {    
-        let dev = this.Devices.findIndex(x => x.ip == commander.ip);
+        let dev = this.Devices.findIndex(x => x.ip == commander.ip && x.mode == commander.mode);
 
         if(dev==-1)         
             this.Devices.push(commander);
