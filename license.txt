@@ -1,0 +1,25 @@
+Custom License Agreement @ 2025 DM5XX
+
+Version 1.0
+
+1. Definitions
+
+- "Software" refers to the code and associated files provided under this license.
+- "Modification" refers to any changes made to the Software, including but not limited to enhancements, bug fixes, or alterations.
+
+2. Grant of License
+You are granted a non-exclusive, non-transferable license to use the Software for personal, educational, or research purposes only.
+
+3. Restrictions
+- Commercial Use: You may not use the Software for commercial purposes. This includes, but is not limited to, selling, licensing, or distributing the Software for profit.
+- Distribution: You may not distribute the Software in any form, whether modified or unmodified, to any third parties.
+- Modifications: If you modify the Software, you are required to submit your modifications back to the public repository from which you obtained the Software. This must be done within 30 days of making the modifications.
+
+4. No Warranty
+The Software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, or non-infringement.
+
+5. Termination
+This license will terminate automatically if you fail to comply with any of the terms and conditions stated herein. Upon termination, you must cease all use of the Software and destroy all copies in your possession.
+
+6. Governing Law
+This license shall be governed by and construed in accordance with the laws of germany.
