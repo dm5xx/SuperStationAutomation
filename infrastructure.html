@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="bigh">Super.Station.Automation</div>
+    <div class="bigh" id="logo">Super.Station.Automation</div>
     <div class="smallh">Infrastructure Admin Panel</div>
     <p>
         <button class="button" id="loadController">Load ControllerSetup</button>
@@ -198,6 +198,11 @@
             saveFile(content.json);
             controllers = content.json;
         }
+
+        document.getElementById('logo').onclick = function () {
+	    	location.href = "index.html";
+    	};
+
       </script>
 </body>
 </html>

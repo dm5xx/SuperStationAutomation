@@ -16,7 +16,7 @@
         <div id="message-list"></div>
     </div>
 
-    <div class="bigh">Super.Station.Automation</div>
+    <div class="bigh" id="logo">Super.Station.Automation</div>
     <div class="smallh">Button Panel</div>
     <p>
         <button class="button" id="loadButtonConfig">Load ButtonConfig</button>
@@ -321,6 +321,11 @@
         {
             buttonGenerator(buttonJson);
         }
+
+        document.getElementById('logo').onclick = function () {
+	    	location.href = "index.html";
+    	};
+
     </script>
 </body>
 </html>
