@@ -1,3 +1,15 @@
+The problem:
+
+YOU need to click on many buttons to set up your desired station: bands, antennas, filters…?
+YOU need to click on many buttons to change a current state of your station?
+YOU just want an easy way to controll, setup and orchestrate you station by just on click?
+
+YOU want to fire different commands with a decent delay and chain them?
+YOU want to create customizable dashboards with simple call to action buttons?
+
+YOU want to store the individual states of all of your controllers after configuration?
+YOU want to recall a saved state of all of your controllers any time: wpx2021, cqww2023ssb, cqww2025cw, …. Setup done in seconds!
+
 The goal:
 
 Reduce setup time!
@@ -13,4 +25,5 @@ Chain commands of local controllers, of different controllers in ur networks, o
 On-button-click => Fast, reliable execution!
 
 The choice is yours: Local App on your computer or put it on your webserver
-![image](https://github.com/user-attachments/assets/bcf9019f-69c0-4afd-91a4-466c16ffad5a)
+
+Here is your solution!
