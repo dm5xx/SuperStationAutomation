@@ -1,0 +1,4 @@
+node_modules
+Batch*.*
+app.exe
+dotnet*.*
