@@ -1,4 +1,5 @@
 {
     "buttonJsonName" : "buttons",
-    "controllersJsonName" : "controllers"
+    "controllersJsonName" : "controllers",
+    "httpPort": 555
 }

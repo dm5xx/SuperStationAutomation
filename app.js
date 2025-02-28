@@ -117,7 +117,6 @@ function fire(ttt) {
 const customExecuteHandler = async (command, params, req, res) => {
 
     console.log(`Custom handler processing command: ${command}`);
-
     elementFnd = findElementByTitle(command);
 
     if(elementFnd != undefined)
@@ -126,12 +125,9 @@ const customExecuteHandler = async (command, params, req, res) => {
     }
 };
 
-const init = function() {
-}
-
 // Server mit benutzerdefinierten Optionen und einem Callback erstellen
 const server = new WebServer({
-  httpPort: 555,
+  httpPort: appconfig.httpPort,
   logRequests: false
 }, customExecuteHandler);
 
