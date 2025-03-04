@@ -212,16 +212,42 @@
             } 
         }
 
+        const isValidJSON = str => {
+            try {
+                JSON.parse(str);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        };
+
         document.getElementById('saveToFile').onclick = async function () {
-            const content = editor.get()
-            const hdl = await saveFile(content.json);
+            let content = editor.get();
+            let res = null;
+            
+            if(content.json != undefined)
+                res = content.json;
+            else if(content.text != undefined)
+                res = content.text;
+
+            const hdl = await saveFile(isValidJSON(res)? JSON.parse(res) : res);
             location.reload();
             controllers = content.json;
         }
 
-        const saveToServer = async (conten) => {
+        const saveToServer = async () => {
+            let content = editor.get();
+            let res = null;
+            
+            if(content.json != undefined)
+                res = content.json;
+            else if(content.text != undefined)
+                res = content.text;
 
-            const getEditorContent = JSON.stringify(editor.get());
+            // if(isValidJSON(res))
+            //     getEditorContent = JSON.stringify(res);
+            // else
+            //     getEditorContent = res;
             
             const response = await fetch("%URLPLACEHOLDER%", {
             method: 'POST',
@@ -229,7 +255,7 @@
             'Accept': 'application/json',
             'Content-Type': 'application/json'
             },
-            body: getEditorContent
+            body: (isValidJSON(res)? JSON.stringify(res) : res)
             });
         }
 
