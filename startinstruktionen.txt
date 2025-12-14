@@ -1,0 +1,26 @@
+startinstruktionen und wichtige befehle
+sudo node --inspect-brk=0.0.0.0:9229 app.js und eine launch.json => attach to Process
+
+killall node
+
+xdebug f php
+php -v
+sudo apt-get install php-xdebug (https://docs.devsense.com/vscode/debug/xdebug-linux/#step-by-step-guide)
+
+muss sein 20-xdebug.ini:
+zend_extension=xdebug.so
+xdebug.mode=debug
+xdebug.log="/tmp/xdebug/log"
+xdebug.client_port = 9003
+xdebug.start_with_request=yes
+xdebug.client_host = 127.0.0.1
+
+
+JSON-Filestruktur: -rwxrwxrwx 1 www-data www-data   100 Dec 14 16:08 appconfig.json
+-rwxrwxrwx 1 www-data www-data   444 Dec 14 16:08 btnTemplate_adv.json
+-rwxrwxrwx 1 www-data www-data   763 Dec 14 16:08 btnTemplate.json
+-rw-r--r-- 1 www-data www-data 17854 Dec 14 20:07 buttons.json
+-rwxrwxrwx 1 www-data www-data    65 Dec 14 16:51 controllers.json
+-rwxrwxrwx 1 www-data www-data   212 Dec 14 16:08 statesWPX2024.json
+-rwxrwxrwx 1 www-data www-data   129 Dec 14 16:08 statesWPX2025.json
+-rwxrwxrwx 1 www-data www-data   444 Dec 14 20:04 xxxx.json
