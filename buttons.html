@@ -255,7 +255,7 @@
             'Accept': 'application/json',
             'Content-Type': 'application/json'
             },
-            body: (isValidJSON(res)? JSON.stringify(res) : res)
+            body: (!isValidJSON(res)? JSON.stringify(res) : res)
             });
         }
 

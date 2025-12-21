@@ -1,6 +1,8 @@
 const express = require('express');
 const http = require('http');
 const bodyParser = require('body-parser');
+const fs = require("fs");
+const path = require("path");
 
 class WebServer {
   constructor(options = {}, executeCallback = null) {
@@ -36,9 +38,13 @@ class WebServer {
         next();
       });
     }
+
+    this.app.use(express.static('./'))
+
   }
   
   setupRoutes() {
+
     // Execute-Endpoint als GET-Route
     this.app.get('/execute', async (req, res) => {
       try {
@@ -82,7 +88,79 @@ class WebServer {
           });
         }
       }
-    });    
+    });
+    
+    this.app.get("/creator", (req, res) => {
+      const filename = req.query.fn ? `${req.query.fn}.html` : null;
+      const myjson = req.query.jn ? `${req.query.jn}.json` : null;
+
+      if (!filename) {
+          return res.send("No filename provided. Use ?fn=yourfile");
+      }
+
+      // Only allow HTML files
+      if (path.extname(filename) !== ".html") {
+          return res.status(400).send("Error: Invalid file type. Only HTML files are allowed.");
+      }
+
+      try {
+          const processedContent = this.processHTMLFile(filename, myjson, req);
+          res.send(processedContent);
+      } catch (err) {
+          res.status(500).send(`An error occurred: ${err.message}`);
+      }
+    });
+
+    this.app.get("/jsonhandlerread", (req, res) => {
+      const filename = req.query.fn;
+
+      if (!filename) {
+          return res
+              .status(400)
+              .json({ State: "FileNotFound" });
+      }
+
+      const safeFilename = path.basename(filename);
+      const filepath = path.join(__dirname, "JSON", safeFilename);
+
+      if (!fs.existsSync(filepath)) {
+          return res
+              .status(404)
+              .json({ State: "FileNotFound" });
+      }
+
+      try {
+          const data = fs.readFileSync(filepath, "utf8");
+          res.setHeader("Content-Type", "application/json");
+          res.send(data);
+      } catch (err) {
+          res.status(500).json({ State: "ReadError" });
+      }
+    });
+
+    this.app.post("/jsonhandlerwrite", (req, res) => {
+      const filename = req.query.fn;
+
+      if (!filename) {
+          return res.status(400).json({ State: "MissingFilename" });
+      }
+
+      const safeFilename = path.basename(filename);
+      const filepath = path.join(__dirname, "JSON", safeFilename);
+
+      // if (!req.body || typeof req.body.json === "undefined") {
+      //     return res.status(400).json({ State: "InvalidJSON" });
+      // }
+
+      try {
+          const cleanedJson = JSON.stringify(req.body).replace(/\\/g, "");
+          fs.writeFileSync(filepath, cleanedJson, "utf8");
+
+          res.json({ State: "Save" });
+      } catch (err) {
+          res.status(500).json({ State: "WriteError" });
+      }
+    });
   }
     
   start() {
@@ -112,6 +190,66 @@ class WebServer {
       }
     });
   }
+
+  processHTMLFile(filename, myjson, req) {
+    // Prevent directory traversal
+    const safeFilename = path.basename(filename);
+    const filepath = path.join(__dirname, safeFilename);
+
+    const safeJsonName = myjson ? path.basename(myjson) : null;
+    const jsonFilePath = safeJsonName
+        ? path.join(__dirname, "JSON", safeJsonName)
+        : null;
+
+    console.log(filepath);
+
+    // Check file existence & readability
+    if (!fs.existsSync(filepath)) {
+        throw new Error("Error: File not found or not readable.");
+    }
+
+    let content = fs.readFileSync(filepath, "utf8");
+
+    if (filename === "buttons.html" && myjson) {
+        const jsonContent = fs.readFileSync(jsonFilePath, "utf8");
+
+        const protocol = req.secure ? "https" : "http";
+        let baseUrl = `${protocol}://${req.get("host")}${path.dirname(req.originalUrl)}`.replace();
+
+        
+        if (baseUrl.substring(baseUrl.length-1) == "/")
+        {
+            baseUrl = baseUrl.substring(0, baseUrl.length-1);
+        }
+        
+        const actualLink = `${baseUrl}/jsonhandlerwrite`;
+        const actualLinkNewButtonFile = `${baseUrl}/newbuttonfile.js`;
+
+        const replacements = {
+            "let buttonJson = null;": `let buttonJson = ${jsonContent};`,
+            "readConfigFile()": "readConfigServer()",
+            "./jsonhandlerread.php?fn=": `./jsonhandlerread?fn=${myjson}`,
+            "saveFile(": "saveToServer(",
+            "%URLPLACEHOLDER%": `${actualLink}?fn=${myjson}`,
+            "//NEWFILEATSERVERJS": fs
+                .readFileSync("./newfileplaceholderjs.txt", "utf8")
+                .replace("%pathnewbuttonfile%", actualLinkNewButtonFile),
+            "<!--NEWFILEATSERVERHTML-->": fs.readFileSync(
+                "./newfileplaceholderhtml.txt",
+                "utf8"
+            ),
+            "onclick=\"fopenOverlay()\" style=\"visibility: hidden;\"":
+                "onclick=\"fopenOverlay()\" style=\"visibility: show;\""
+        };
+
+        for (const [search, replace] of Object.entries(replacements)) {
+            content = content.split(search).join(replace);
+        }
+    }
+
+    return content;
+  }
+
 }
 
 module.exports = WebServer;

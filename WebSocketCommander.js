@@ -37,11 +37,11 @@ class WebSocketCommander {
                 this.socket.on('error', (error) => {
                     this.isConnecting = false;
                     this.updateStatus('Connection Error');
-                    reject(error);
+                    //reject(error);
                 });
             } catch (error) {
                 this.isConnecting = false;
-                reject(error);
+                //reject(error);
             }
         });
     }
