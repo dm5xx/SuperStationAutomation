@@ -1,0 +1,32 @@
+{
+    "type": "node",
+    "request": "attach",
+    "name": "Debug remote",
+    "protocol": "inspector",
+    "address": "localhost",
+    "port": 9229,
+    "sourceMaps": true,
+    "localRoot": "${workspaceFolder}",
+    "remoteRoot": "/path/to/my/project/",
+    "configurations": [
+
+
+    {
+      "name": "Attach by Process ID",
+      "processId": "${command:PickProcess}",
+      "request": "attach",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "type": "node"
+    },
+    {
+            "name": "listen for Xdebug",
+            "type": "php",
+            "request": "launch",
+            "port": 9003,
+            "stopOnEntry": true
+    }   
+    ]
+}
+
