@@ -173,7 +173,7 @@
 
         const readConfigServer = async () =>
         {
-            const url = "./jsonhandlerread.php?fn=";
+            const url = "./jsonhandlerread.php?fn="; // dont change this from php due to replecement!
             try {
                 const response = await fetch(url);
                 if (!response.ok) {
@@ -259,25 +259,72 @@
             });
         }
 
+        async function showMySaveFilePicker(options = {}) {
+        const supportsNative =
+            typeof window !== "undefined" &&
+            window.showSaveFilePicker &&
+            window.isSecureContext;
+
+        if (supportsNative) {
+            // Native File System Access API
+            return await window.showSaveFilePicker(options);
+        }
+
+        // ---------- Fallback for HTTP or unsupported browsers ----------
+        return {
+            async createWritable() {
+            let chunks = [];
+
+            return {
+                async write(data) {
+                if (data instanceof Blob) {
+                    chunks.push(data);
+                } else {
+                    chunks.push(new Blob([data]));
+                }
+                },
+
+                async close() {
+                const blob = new Blob(chunks, {
+                    type: options.types?.[0]?.accept
+                    ? Object.values(options.types[0].accept)[0][0]
+                    : "application/octet-stream",
+                });
+
+                const filename =
+                    options.suggestedName || "RENAME_ME.json";
+
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(blob);
+                a.download = filename;
+                a.style.display = "none";
+
+                document.body.appendChild(a);
+                a.click();
+
+                URL.revokeObjectURL(a.href);
+                document.body.removeChild(a);
+                },
+            };
+            },
+        };
+        }
+
         const saveFile = async (content) => {
             try {
-                // create a new handle
-                const newHandle = await window.showSaveFilePicker();
+                const handle = await showMySaveFilePicker({
+                suggestedName: "RENAME_ME.json",
+                types: [
+                    {
+                    description: "JSON File",
+                    accept: { "text/plain": [".json"] },
+                    },
+                ],
+                });
 
-                // create a FileSystemWritableFileStream to write to
-                const stream = await newHandle.createWritable();
-
-                try {
-                    await stream.write({
-                    type: "write",
-                    data: JSON.stringify(content)
-                    });
-                    await stream.close();
-                } catch (error) {
-                    console.error('Error writing to file:', error);
-                    await stream.abort();
-                }
-                
+                const writable = await handle.createWritable();
+                await writable.write(JSON.stringify(content));
+                await writable.close();                
             } catch (err) {
                 console.error(err.name, err.message);
             }

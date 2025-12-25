@@ -15,6 +15,15 @@ xdebug.client_port = 9003
 xdebug.start_with_request=yes
 xdebug.client_host = 127.0.0.1
 
+launchjson f xdebug
+ {
+            "name": "listen for Xdebug",
+            "type": "php",
+            "request": "launch",
+            "port": 9003,
+            "stopOnEntry": true
+}
+
 
 JSON-Filestruktur: -rwxrwxrwx 1 www-data www-data   100 Dec 14 16:08 appconfig.json
 -rwxrwxrwx 1 www-data www-data   444 Dec 14 16:08 btnTemplate_adv.json

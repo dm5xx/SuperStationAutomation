@@ -1,32 +1,15 @@
 {
-    "type": "node",
-    "request": "attach",
-    "name": "Debug remote",
-    "protocol": "inspector",
-    "address": "localhost",
-    "port": 9229,
-    "sourceMaps": true,
-    "localRoot": "${workspaceFolder}",
-    "remoteRoot": "/path/to/my/project/",
-    "configurations": [
-
-
+  "version": "0.2.0",
+  "configurations": [
     {
-      "name": "Attach by Process ID",
-      "processId": "${command:PickProcess}",
+      "name": "Attach Raspberry Pi Node",
+      "type": "node",
       "request": "attach",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
-      "type": "node"
-    },
-    {
-            "name": "listen for Xdebug",
-            "type": "php",
-            "request": "launch",
-            "port": 9003,
-            "stopOnEntry": true
-    }   
-    ]
+      "address": "localhost",
+      "port": 9229,
+      "restart": false,
+      "protocol": "inspector",
+      "timeout": 20000
+    }
+  ]
 }
-

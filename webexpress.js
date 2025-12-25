@@ -3,6 +3,7 @@ const http = require('http');
 const bodyParser = require('body-parser');
 const fs = require("fs");
 const path = require("path");
+const cors = require("cors");
 
 class WebServer {
   constructor(options = {}, executeCallback = null) {
@@ -27,6 +28,10 @@ class WebServer {
   }
   
   setupMiddleware() {
+
+    this.app.use(
+      cors({ origin: "*" })
+    );
     // JSON-Parser für Request-Body
     this.app.use(bodyParser.json());
     this.app.use(bodyParser.urlencoded({ extended: true }));
@@ -161,6 +166,45 @@ class WebServer {
           res.status(500).json({ State: "WriteError" });
       }
     });
+
+    this.app.get("/newbuttonfile", (req, res) => {
+      res.setHeader("Content-Type", "application/json");
+
+      // Get filename from query
+      let filename = req.query.fn || "";
+
+      // Validate filename
+      if (!filename) {
+          return res.json({ success: false, message: "Filename is required" });
+      }
+
+      // Sanitize filename
+      filename = path.basename(filename); // remove path components
+      filename = filename.replace(/[^a-zA-Z0-9._-]/g, "");
+
+      // Ensure .json extension
+      if (!filename.endsWith(".json")) {
+          filename += ".json";
+      }
+
+      const directory = path.join(__dirname, "JSON");
+      const filepath = path.join(directory, filename);
+
+      try {
+          // Read template
+          const templatePath = path.join(directory, "btnTemplate.json");
+          const templateData = fs.readFileSync(templatePath, "utf8");
+
+          // Create/write file
+          fs.writeFileSync(filepath, templateData, "utf8");
+
+          res.json({ success: 1 });
+      } catch (err) {
+          console.error(err);
+          res.status(500).json({ success: false, message: "Server error" });
+      }
+    });
+
   }
     
   start() {
@@ -210,6 +254,7 @@ class WebServer {
 
     let content = fs.readFileSync(filepath, "utf8");
 
+    // let controllers file be local! 
     if (filename === "buttons.html" && myjson) {
         const jsonContent = fs.readFileSync(jsonFilePath, "utf8");
 
@@ -223,7 +268,7 @@ class WebServer {
         }
         
         const actualLink = `${baseUrl}/jsonhandlerwrite`;
-        const actualLinkNewButtonFile = `${baseUrl}/newbuttonfile.js`;
+        const actualLinkNewButtonFile = `${baseUrl}/newbuttonfile`;
 
         const replacements = {
             "let buttonJson = null;": `let buttonJson = ${jsonContent};`,
