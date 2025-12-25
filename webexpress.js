@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const fs = require("fs");
 const path = require("path");
 const cors = require("cors");
+const { exec } = require('child_process');
 
 class WebServer {
   constructor(options = {}, executeCallback = null, renewDeviceHandler = null, forceWebsocketReconnect = null) {
@@ -323,6 +324,40 @@ class WebServer {
             console.log("Shutdown über /shutdown ausgelöst");
             process.exit(0);
         }, 100);
+    });
+
+    this.app.get("/hardstop", (req, res) => {
+      const { p } = req.query;
+      if (p !== this.config.password) {
+        return res.status(404).json({
+              success: false,
+              message: "Zugriff verweigert"
+          });
+        }
+
+        // kurze Verzögerung, damit die Antwort noch gesendet wird
+        setTimeout(() => {
+            exec('pm2 stop ssa', (error, stdout, stderr) => {
+                if (error) {
+                    return res.status(500).json({
+                        error: 'Fehler beim Ausführen von pm2 stop',
+                        details: error.message
+                    });
+                }
+
+                if (stderr) {
+                    return res.status(500).json({
+                        error: 'pm2 stderr',
+                        details: stderr
+                    });
+                }
+
+                res.json({
+                    message: 'pm2 stop erfolgreich ausgeführt',
+                    output: stdout
+                });
+            });
+        }, 500);
     });
 
     this.app.get("/renewdevices", (req, res) => {

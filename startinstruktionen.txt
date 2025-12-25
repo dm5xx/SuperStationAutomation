@@ -12,6 +12,9 @@ HINWEIS: Es macht keinen sinn, infrastructure = controllers datei auf dem server
 wird dann auf den server verschoben. sie sollte immer controllers.json heißen. kann aber auch anders heissen oder es können dort mehrere
 abgelegt werden (JSON) => appconfig.json muss entsprechend angepasst werden.
 
+command chain per url ausführen lassen: (key used = title)
+    http://192.168.88.99:555/execute?command=SomeOn
+
 irgendein json per post in JSON abspeichern:
     http://192.168.88.7:555/filedominator.html?filename=conti.json&p=magicmike
 
@@ -30,6 +33,10 @@ deviceliste neu einladen:
 websockets neu connecten:
     http://192.168.88.99:555/forcewebsocketreconnect?p=magicmike
     //TODO: AUTO RECOONECT!!!!
+
+pm2 von ssa manuell anhalten:
+    http://192.168.88.99:555/hardstop?p=magicmike
+
 
 
 NodeJS Debugging:
@@ -59,3 +66,15 @@ launchjson f xdebug
             "port": 9003,
             "stopOnEntry": true
 }
+
+pm2 installieren:
+https://pm2.io/docs/runtime/guide/installation/
+
+pm2 l
+pm2 start app.js --name ssa // dont change this!!!
+pm2 restart app_name
+pm2 reload app_name
+pm2 stop app_name
+pm2 delete app_name
+
+--name <app_name>
