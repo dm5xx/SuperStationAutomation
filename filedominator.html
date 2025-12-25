@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>filedominator</title>
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanilla-jsoneditor@2.3.3/themes/jse-theme-dark.css"> -->
+    <link rel="stylesheet" href="styles.css">
+     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+        }
+        textarea {
+            width: 100%;
+            height: 400px;
+            font-size: 14px;
+            background-color: #272727;
+            color: aliceblue;
+        } 
+            </style>
+</head>
+<body>
+<div class="bigh" id="logo">Super.Station.Automation</div>
+<div class="smallh">filedominator</div>
+
+<textarea class="jse-theme-dark" id="content" placeholder="Dateiinhalt hier eingeben..."></textarea>
+<br>
+<button class="button"onclick="saveFile()">Speichern</button>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const filename = params.get("filename");
+    const p = params.get("p");
+
+    // Basis-URL der aktuell aufgerufenen Seite
+    const baseUrl = window.location.origin;
+
+    if (!filename) {
+        alert("GET-Parameter 'filename' ist erforderlich!");
+    }
+
+    function saveFile() {
+        fetch(`${baseUrl}/filedominator`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                filename: filename,
+                content: document.getElementById("content").value,
+                p: p
+            })
+        })
+        .then(res => res.json())
+        .then(data => alert(data.message))
+        .catch(err => alert("Fehler: " + err));
+    }
+</script>
+
+</body>
+</html>

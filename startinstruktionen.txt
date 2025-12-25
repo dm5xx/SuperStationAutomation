@@ -1,8 +1,44 @@
 startinstruktionen und wichtige befehle
+
+appconfig per url befehl schreiben/ändern:
+    http://192.168.88.99:555/writeappconfig?content={"buttonJsonName":"buttons","controllersJsonName":"controllers","httpPort":555}
+
+buttons.html per nodejs laden: 
+    http://192.168.88.77:555/creator?fn=buttons&jn=buttons
+
+infrastructur.html per nodejs laden:
+    http://192.168.88.7:555/creator?fn=infrastructure&jn=controllers
+HINWEIS: Es macht keinen sinn, infrastructure = controllers datei auf dem server zu scheiben. Daher wird dies lokal gemacht. die erzeugte datei
+wird dann auf den server verschoben. sie sollte immer controllers.json heißen. kann aber auch anders heissen oder es können dort mehrere
+abgelegt werden (JSON) => appconfig.json muss entsprechend angepasst werden.
+
+irgendein json per post in JSON abspeichern:
+    http://192.168.88.7:555/filedominator.html?filename=conti.json&p=magicmike
+
+files in json auflisten:
+    http://192.168.88.99:555/listjson
+
+files löschen:
+    http://192.168.88.99:555/delete?p=magicmike&filename=test.txt
+
+nodejsserver manuell neu starten:
+    http://192.168.88.99:555/shutdown?p=magicmike
+
+deviceliste neu einladen:
+    http://192.168.88.99:555/renewdevices?p=magicmike
+
+websockets neu connecten:
+    http://192.168.88.99:555/forcewebsocketreconnect?p=magicmike
+    //TODO: AUTO RECOONECT!!!!
+
+
+NodeJS Debugging:
 sudo node --inspect-brk=0.0.0.0:9229 app.js und eine launch.json => attach to Process
 
+Alle Node prozesse killen:
 killall node
 
+XDEBUG f php einrichten (obsolete)
 xdebug f php
 php -v
 sudo apt-get install php-xdebug (https://docs.devsense.com/vscode/debug/xdebug-linux/#step-by-step-guide)
@@ -23,13 +59,3 @@ launchjson f xdebug
             "port": 9003,
             "stopOnEntry": true
 }
-
-
-JSON-Filestruktur: -rwxrwxrwx 1 www-data www-data   100 Dec 14 16:08 appconfig.json
--rwxrwxrwx 1 www-data www-data   444 Dec 14 16:08 btnTemplate_adv.json
--rwxrwxrwx 1 www-data www-data   763 Dec 14 16:08 btnTemplate.json
--rw-r--r-- 1 www-data www-data 17854 Dec 14 20:07 buttons.json
--rwxrwxrwx 1 www-data www-data    65 Dec 14 16:51 controllers.json
--rwxrwxrwx 1 www-data www-data   212 Dec 14 16:08 statesWPX2024.json
--rwxrwxrwx 1 www-data www-data   129 Dec 14 16:08 statesWPX2025.json
--rwxrwxrwx 1 www-data www-data   444 Dec 14 20:04 xxxx.json

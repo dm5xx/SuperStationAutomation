@@ -6,16 +6,20 @@ const path = require("path");
 const cors = require("cors");
 
 class WebServer {
-  constructor(options = {}, executeCallback = null) {
+  constructor(options = {}, executeCallback = null, renewDeviceHandler = null, forceWebsocketReconnect = null) {
     // Standard-Konfigurationsoptionen
     this.config = {
       httpPort: options.httpPort || 3000,
-      logRequests: options.logRequests !== undefined ? options.logRequests : true
+      logRequests: options.logRequests !== undefined ? options.logRequests : true,
+      password: options.password || "magicmike"
     };
     
     // Callback-Funktion für Execute-Endpoint
     this.executeCallback = executeCallback;
-    
+    this.renewDeviceHandler = renewDeviceHandler;
+    this.forceWebsocketReconnect = forceWebsocketReconnect;
+
+
     // Express-App initialisieren
     this.app = express();
     this.httpServer = null;
@@ -203,6 +207,160 @@ class WebServer {
           console.error(err);
           res.status(500).json({ success: false, message: "Server error" });
       }
+    });
+
+    this.app.get('/writeappconfig', (req, res) => {
+      const { content } = req.query;
+
+      if (!content) {
+          return res.status(400).json({ error: 'Parameter "content" fehlt' });
+      }
+
+      let jsonData;
+      try {
+          jsonData = JSON.parse(content);
+      } catch (err) {
+          return res.status(400).json({ error: 'content ist kein gültiger JSON-String' });
+      }
+
+      const filePath = path.join(__dirname, './JSON/appconfig.json');
+
+      fs.writeFile(filePath, JSON.stringify(jsonData, null, 4), 'utf8', (err) => {
+          if (err) {
+              return res.status(500).json({ error: 'Datei konnte nicht geschrieben werden' });
+          }
+
+          res.json({
+              State: '200',
+              path: filePath
+          });
+      });
+    });
+
+    this.app.post("/filedominator", (req, res) => {
+      const { filename, content, p} = req.body;
+
+      if (p !== this.config.password || !filename || content === undefined) {
+          return res.status(400).json({ message: "filename und content erforderlich" });
+      }
+
+      const safeFilename = path.basename(filename);
+      const filePath = path.join(__dirname, './JSON/'+safeFilename);
+
+      fs.writeFile(filePath, content, "utf8", err => {
+          if (err) {
+              return res.status(500).json({ message: "Fehler beim Speichern" });
+          }
+          res.json({ message: `Datei '${safeFilename}' gespeichert` });
+      });
+    });
+
+    this.app.get("/listjson", (req, res) => {
+    fs.readdir(__dirname+'/JSON', { withFileTypes: true }, (err, entries) => {
+        if (err) {
+            return res.status(500).json({
+                success: false,
+                message: "Verzeichnis konnte nicht gelesen werden"
+            });
+        }
+
+        const files = entries
+            .filter(entry => entry.isFile())
+            .map(entry => entry.name);
+
+        res.json({
+            success: true,
+            directory: __dirname + '/JSON',
+            count: files.length,
+            files: files
+        });
+    });
+    });
+
+    this.app.get("/deletefile", (req, res) => {
+        const { p, filename } = req.query;
+
+        if (p !== this.config.password || !filename) {
+            return res.status(404).json({
+                success: false,
+                message: "Datei nicht gefunden oder Zugriff verweigert"
+            });
+        }
+
+        const safeFilename = path.basename(filename);
+        const filePath = path.join(__dirname+'/JSON', safeFilename);
+
+        fs.unlink(filePath, err => {
+            if (err) {
+                return res.status(404).json({
+                    success: false,
+                    message: "Datei nicht gefunden oder konnte nicht gelöscht werden"
+                });
+            }
+
+            res.status(200).json({
+                success: true,
+                message: `Datei '${safeFilename}' gelöscht`
+            });
+        });
+    });
+
+    this.app.get("/shutdown", (req, res) => {
+      const { p } = req.query;
+      if (p !== this.config.password) {
+        return res.status(404).json({
+              success: false,
+              message: "Zugriff verweigert"
+          });
+        }
+        res.status(200).json({
+            success: true,
+            message: "Node.js Prozess wird beendet"
+        });
+
+        // kurze Verzögerung, damit die Antwort noch gesendet wird
+        setTimeout(() => {
+            console.log("Shutdown über /shutdown ausgelöst");
+            process.exit(0);
+        }, 100);
+    });
+
+    this.app.get("/renewdevices", (req, res) => {
+      const { p } = req.query;
+      if (p !== this.config.password) {
+        return res.status(404).json({
+              success: false,
+              message: "Zugriff verweigert"
+          });
+        }
+        res.status(200).json({
+            success: true,
+            message: "Geräte neu initialisiert"
+        });
+
+        // kurze Verzögerung, damit die Antwort noch gesendet wird
+        setTimeout(() => {
+          this.renewDeviceHandler();
+        }, 100);
+    });
+
+    this.app.get("/forcewebsocketreconnect", (req, res) => {
+      const { p } = req.query;
+      if (p !== this.config.password) {
+        return res.status(404).json({
+              success: false,
+              message: "Zugriff verweigert"
+          });
+        }
+        res.status(200).json({
+            success: true,
+            message: "Websocket-Verbindungen erneut herstellen"
+        });
+
+        // kurze Verzögerung, damit die Antwort noch gesendet wird
+        setTimeout(() => {
+          this.forceWebsocketReconnect();
+        }, 100);
     });
 
   }

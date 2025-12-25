@@ -37,10 +37,11 @@ class WebSocketCommander {
                 this.socket.on('error', (error) => {
                     this.isConnecting = false;
                     this.updateStatus('Connection Error');
-                    //reject(error);
+                    console.log("Websocket Error for ", this.url);
                 });
             } catch (error) {
                 this.isConnecting = false;
+                console.log("Websocket Error for ", this.url);
                 //reject(error);
             }
         });
@@ -102,7 +103,8 @@ class WebSocketCommander {
             // Error handler
             const errorHandler = (error) => {
                 cleanup();
-                reject(error);
+                //reject(error);
+                console.log("Websocket Error for ", this.url);
             };
     
             // Cleanup function to remove listeners
@@ -121,7 +123,8 @@ class WebSocketCommander {
                 this.socket.send(command);
             } catch (error) {
                 cleanup();
-                reject(error);
+                //reject(error);
+                console.log("Websocket Error for ", this.url);
             }
         });
     }

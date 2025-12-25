@@ -128,8 +128,18 @@ const customExecuteHandler = async (command, params, req, res) => {
 // Server mit benutzerdefinierten Optionen und einem Callback erstellen
 const server = new WebServer({
   httpPort: appconfig.httpPort,
-  logRequests: false
-}, customExecuteHandler);
+  logRequests: false,
+    password: appconfig.password
+}, customExecuteHandler, 
+renewDeviceHandler = () => {
+    aDeviceHandler.RemoveAllDevices();
+    aDeviceHandler.initControllers();
+}, 
+forceWebsocketReconnect = () => {
+    aDeviceHandler.Devices.forEach(element => {
+        element.init();
+    });
+});
 
 // Server starten
 server.start()

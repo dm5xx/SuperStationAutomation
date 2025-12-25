@@ -1,5 +1,6 @@
 {
-    "buttonJsonName" : "buttons",
-    "controllersJsonName" : "controllers",
-    "httpPort": 555
+    "buttonJsonName": "buttons",
+    "controllersJsonName": "controllers",
+    "httpPort": 555,
+    "password": "magicmike"
 }
